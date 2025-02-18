@@ -1,0 +1,4 @@
+// статья про UnityEngine.Pool
+// https://habr.com/ru/companies/otus/articles/560880/
+//
+//
