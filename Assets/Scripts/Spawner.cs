@@ -41,12 +41,24 @@ public class Spawner : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        //Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+        //other.GetComponent<MeshRenderer>().material.color = color;
+
+        Renderer renderer = other.GetComponent<Renderer>();
+        renderer.material.color = GenerateRandomColor();
+
         _pool.Release(other.gameObject);
     }
 
+    private Color GenerateRandomColor()
+    {
+        return new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1);
+    }
+
+
     private Vector3 StartPoint()
     {
-        float y= _startPoint.transform.position.y;
+        float y = _startPoint.transform.position.y;
         float x = Random.Range(-10, 10);
         float z = Random.Range(-10, 10);
 
