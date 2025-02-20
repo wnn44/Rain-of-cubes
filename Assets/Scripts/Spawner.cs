@@ -1,5 +1,7 @@
 using UnityEngine.Pool;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Collections;
 
 public class Spawner : MonoBehaviour
 {
@@ -24,6 +26,9 @@ public class Spawner : MonoBehaviour
 
     private void ActionOnGet(GameObject obj)
     {
+        obj.GetComponent<Renderer>().material.color = new Color(0f, 0f, 150f);
+        obj.GetComponent<Cube>().Color—hanged = false;
+
         obj.transform.position = StartPoint();
         obj.GetComponent<Rigidbody>().velocity = Vector3.zero;
         obj.SetActive(true);
@@ -36,25 +41,20 @@ public class Spawner : MonoBehaviour
 
     private void GetSphere()
     {
-        _pool.Get();
+        _pool.Get();        
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        //Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-        //other.GetComponent<MeshRenderer>().material.color = color;
-
-        Renderer renderer = other.GetComponent<Renderer>();
-        renderer.material.color = GenerateRandomColor();
-
-        _pool.Release(other.gameObject);
+        StartCoroutine(ReturnObjToPool(other.gameObject));
     }
 
-    private Color GenerateRandomColor()
+    private IEnumerator ReturnObjToPool(GameObject obj)
     {
-        return new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1);
-    }
+         yield return new WaitForSeconds(2f);
 
+        _pool.Release(obj);
+    }
 
     private Vector3 StartPoint()
     {
