@@ -1,14 +1,27 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Pool;
 
 [RequireComponent(typeof(Renderer))]
 public class Cube : MonoBehaviour
 {
-    public bool Color—hanged = false;
-    private Renderer renderer;
+    private bool _hasCollided = false;
+    private Renderer _renderer;
+    private Color _initialColor = Color.blue;
+    private float _minTime = 2.0f;
+    private float _maxTime = 5.0f;
+    private ObjectPool<GameObject> _pool;
 
     private void Awake()
     {
-        renderer = GetComponent<Renderer>();
+        _renderer = GetComponent<Renderer>();
+    }
+    
+    public void Init(ObjectPool<GameObject> pool)
+    {
+        _pool = pool;
+        _hasCollided = false;
+        _renderer.material.color = _initialColor;
     }
 
     private Color GenerateRandomColor()
@@ -18,11 +31,20 @@ public class Cube : MonoBehaviour
 
     private void OnTriggerEnter()
     {
-        if (!Color—hanged)
+        if (!_hasCollided)
         {
-            Color—hanged = true;
-            renderer.material.color = GenerateRandomColor();
+            _hasCollided = true;
+            _renderer.material.color = GenerateRandomColor();
+
+            float lifetime = Random.Range(_minTime, _maxTime);
+            StartCoroutine(ReturnToPoolAfterDelay(lifetime));
         }
+    }
+
+    private IEnumerator ReturnToPoolAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        _pool.Release(gameObject);
     }
 }
 
