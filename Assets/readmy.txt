@@ -1,4 +1,4 @@
-// статья про UnityEngine.Pool
+// UnityEngine.Pool
 // https://habr.com/ru/companies/otus/articles/560880/
-//
+// https://gamedevbeginner.com/how-to-spawn-an-object-in-unity-using-instantiate/
 //
