@@ -1,6 +1,6 @@
+using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Pool;
 
 [RequireComponent(typeof(Renderer))]
 public class Cube : MonoBehaviour
@@ -10,18 +10,19 @@ public class Cube : MonoBehaviour
     private Color _initialColor = Color.blue;
     private float _minTime = 2.0f;
     private float _maxTime = 5.0f;
-    private ObjectPool<GameObject> _pool;
+
+    public static event Action<Cube> ReturnToPool;
+
+    public void Init()
+    {
+        _hasCollided = false;
+        _renderer.material.color = _initialColor;
+        transform.rotation = Quaternion.identity;
+    }
 
     private void Awake()
     {
         _renderer = GetComponent<Renderer>();
-    }
-    
-    public void Init(ObjectPool<GameObject> pool)
-    {
-        _pool = pool;
-        _hasCollided = false;
-        _renderer.material.color = _initialColor;
     }
 
     private Color GenerateRandomColor()
@@ -31,20 +32,20 @@ public class Cube : MonoBehaviour
 
     private void OnTriggerEnter()
     {
-        if (!_hasCollided)
+        if (_hasCollided == false)
         {
             _hasCollided = true;
             _renderer.material.color = GenerateRandomColor();
 
-            float lifetime = Random.Range(_minTime, _maxTime);
-            StartCoroutine(ReturnToPoolAfterDelay(lifetime));
+            StartCoroutine(ReturnToPoolAfterDelay(UnityEngine.Random.Range(_minTime, _maxTime)));
         }
     }
 
     private IEnumerator ReturnToPoolAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        _pool.Release(gameObject);
+
+        ReturnToPool?.Invoke(this);
     }
 }
 

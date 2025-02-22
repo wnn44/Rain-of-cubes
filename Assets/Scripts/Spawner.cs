@@ -1,50 +1,70 @@
 using UnityEngine.Pool;
 using UnityEngine;
+using System.Collections;
 
 public class Spawner : MonoBehaviour
 {
-    [SerializeField] private GameObject _prefab;
+    [SerializeField] private Cube _prefab;
     [SerializeField] private SpawnPoint _startPoint;
-    [SerializeField] private float _repeatRate = 1f;
+    [SerializeField] private float _repeatRate = 0.3f;
     [SerializeField] private int _poolCapacity = 5;
     [SerializeField] private int _poolMaxSize = 5;
 
-    private ObjectPool<GameObject> _pool;
-    private float _startPointMin = -10;
-    private float _startPointMax = 10;
+    private ObjectPool<Cube> _pool;
+    private float _startPointMin = -10.0f;
+    private float _startPointMax = 10.0f;
 
     private void Awake()
     {
-        _pool = new ObjectPool<GameObject>(
+        _pool = new ObjectPool<Cube>(
         createFunc: () => Instantiate(_prefab),
-        actionOnGet: (obj) => ActionOnGet(obj),
-        actionOnRelease: (obj) => obj.SetActive(false),
-        actionOnDestroy: (obj) => Destroy(obj),
+        actionOnGet: (cube) => ActionOnGet(cube),
+        actionOnRelease: (cube) => cube.gameObject.SetActive(false),
+        actionOnDestroy: (cube) => Destroy(cube),
         collectionCheck: true,
         defaultCapacity: _poolCapacity,
         maxSize: _poolMaxSize);
     }
 
+    private void OnEnable()
+    {
+        Cube.ReturnToPool += Release;
+    }
+
+    private void OnDisabe()
+    {
+        Cube.ReturnToPool -= Release;
+    }
+
     private void Start()
     {
-        InvokeRepeating(nameof(GetSphere), 0.0f, _repeatRate);
+        StartCoroutine(SpawnCubes());
     }
 
-    private void ActionOnGet(GameObject obj)
+    private IEnumerator SpawnCubes()
     {
-
-        obj.transform.position = StartPoint();
-        obj.GetComponent<Rigidbody>().velocity = Vector3.zero;
-
-        Cube controller = obj.GetComponent<Cube>();
-        controller.Init(_pool);
-
-        obj.SetActive(true);
+        while (true)
+        {        
+            GetCube();
+            yield return new WaitForSeconds(_repeatRate);
+        }
     }
 
-    private void GetSphere()
+    private void ActionOnGet(Cube cube)
     {
-        _pool.Get();        
+        cube.transform.position = StartPoint();
+        cube.Init();
+        cube.gameObject.SetActive(true);
+    }
+
+    private void GetCube()
+    {
+        _pool.Get();
+    }
+
+    private void Release(Cube cube)
+    {
+        _pool.Release(cube);
     }
 
     private Vector3 StartPoint()
