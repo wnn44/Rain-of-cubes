@@ -13,6 +13,7 @@ public class Spawner : MonoBehaviour
     private ObjectPool<Cube> _pool;
     private float _startPointMin = -10.0f;
     private float _startPointMax = 10.0f;
+    private INotifier _notifier;
 
     private void Awake()
     {
@@ -26,27 +27,21 @@ public class Spawner : MonoBehaviour
         maxSize: _poolMaxSize);
     }
 
-    private void OnEnable()
-    {
-        Cube.ReturnToPool += Release;
-    }
-
-    private void OnDisabe()
-    {
-        Cube.ReturnToPool -= Release;
-    }
-
     private void Start()
     {
+
         StartCoroutine(SpawnCubes());
     }
 
     private IEnumerator SpawnCubes()
     {
+        WaitForSeconds waitForSeconds = new WaitForSeconds(_repeatRate);
+
         while (true)
-        {        
+        {
             GetCube();
-            yield return new WaitForSeconds(_repeatRate);
+
+            yield return waitForSeconds;
         }
     }
 
@@ -59,19 +54,27 @@ public class Spawner : MonoBehaviour
 
     private void GetCube()
     {
-        _pool.Get();
+        Cube getCube = _pool.Get();
+        _notifier = getCube.GetComponent<INotifier>();
+
+        if (_notifier != null)
+        {
+            _notifier.ReturnToPool += onRelease;
+        }
     }
 
-    private void Release(Cube cube)
+    private void onRelease(INotifier notifier)
     {
-        _pool.Release(cube);
+        _pool.Release((Cube)notifier);
+
+        notifier.ReturnToPool -= onRelease;
     }
 
     private Vector3 StartPoint()
     {
         float y = _startPoint.transform.position.y;
-        float x = Random.Range(_startPointMin, _startPointMax);
-        float z = Random.Range(_startPointMin, _startPointMax);
+        float x = UnityEngine.Random.Range(_startPointMin, _startPointMax);
+        float z = UnityEngine.Random.Range(_startPointMin, _startPointMax);
 
         return new Vector3(x, y, z);
     }
