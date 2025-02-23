@@ -29,7 +29,6 @@ public class Spawner : MonoBehaviour
 
     private void Start()
     {
-
         StartCoroutine(SpawnCubes());
     }
 
@@ -37,9 +36,9 @@ public class Spawner : MonoBehaviour
     {
         WaitForSeconds waitForSeconds = new WaitForSeconds(_repeatRate);
 
-        while (true)
+        while (enabled)
         {
-            GetCube();
+            TakeFromPool();
 
             yield return waitForSeconds;
         }
@@ -52,22 +51,22 @@ public class Spawner : MonoBehaviour
         cube.gameObject.SetActive(true);
     }
 
-    private void GetCube()
+    private void TakeFromPool()
     {
-        Cube getCube = _pool.Get();
-        _notifier = getCube.GetComponent<INotifier>();
+        Cube cube = _pool.Get();
+        _notifier = cube.GetComponent<INotifier>();
 
         if (_notifier != null)
         {
-            _notifier.ReturnToPool += onRelease;
+            _notifier.ClubEndedLife += OnRelease;
         }
     }
 
-    private void onRelease(INotifier notifier)
+    private void OnRelease(INotifier notifier)
     {
         _pool.Release((Cube)notifier);
 
-        notifier.ReturnToPool -= onRelease;
+        notifier.ClubEndedLife -= OnRelease;
     }
 
     private Vector3 StartPoint()

@@ -2,5 +2,5 @@ using System;
 
 public interface INotifier
 {
-    public event Action<INotifier> ReturnToPool;    
+    public event Action<INotifier> ClubEndedLife;    
 }

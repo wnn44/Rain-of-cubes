@@ -10,9 +10,8 @@ public class Cube : MonoBehaviour, INotifier
     private Color _initialColor = Color.blue;
     private float _minTime = 2.0f;
     private float _maxTime = 5.0f;
-    private string _tagObjCollision = "Platform";
 
-    public event Action<INotifier> ReturnToPool;
+    public event Action<INotifier> ClubEndedLife;
 
     private void Awake()
     {
@@ -26,17 +25,12 @@ public class Cube : MonoBehaviour, INotifier
         transform.rotation = Quaternion.identity;
     }
 
-    private Color GenerateRandomColor()
-    {
-        return new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1);
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
-        if (_hasCollided == false && collision.gameObject.tag == _tagObjCollision)
+        if (_hasCollided == false && collision.gameObject.TryGetComponent(out Platform platform))
         {
             _hasCollided = true;
-            _renderer.material.color = GenerateRandomColor();
+            _renderer.material.color = platform.GenerateRandomColor();
 
             StartCoroutine(ReturnToPoolAfterDelay(UnityEngine.Random.Range(_minTime, _maxTime)));
         }
@@ -46,7 +40,7 @@ public class Cube : MonoBehaviour, INotifier
     {
         yield return new WaitForSeconds(delay);
 
-        ReturnToPool?.Invoke(this);
+        ClubEndedLife?.Invoke(this);
     }
 }
 
