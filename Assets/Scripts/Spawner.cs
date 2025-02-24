@@ -18,13 +18,13 @@ public class Spawner : MonoBehaviour
     private void Awake()
     {
         _pool = new ObjectPool<Cube>(
-        createFunc: () => Instantiate(_prefab),
-        actionOnGet: (cube) => ActionOnGet(cube),
-        actionOnRelease: (cube) => cube.gameObject.SetActive(false),
-        actionOnDestroy: (cube) => Destroy(cube),
-        collectionCheck: true,
-        defaultCapacity: _poolCapacity,
-        maxSize: _poolMaxSize);
+            createFunc: () => Instantiate(_prefab),
+            actionOnGet: (cube) => ActionOnGet(cube),
+            actionOnRelease: (cube) => cube.gameObject.SetActive(false),
+            actionOnDestroy: (cube) => Destroy(cube),
+            collectionCheck: true,
+            defaultCapacity: _poolCapacity,
+            maxSize: _poolMaxSize);
     }
 
     private void Start()
@@ -54,19 +54,15 @@ public class Spawner : MonoBehaviour
     private void TakeFromPool()
     {
         Cube cube = _pool.Get();
-        _notifier = cube.GetComponent<INotifier>();
 
-        if (_notifier != null)
-        {
-            _notifier.ClubEndedLife += OnRelease;
-        }
+        cube.CubeEndedLife += OnRelease;
     }
 
-    private void OnRelease(INotifier notifier)
+    private void OnRelease(INotifier cube)
     {
-        _pool.Release((Cube)notifier);
+        _pool.Release((Cube)cube);
 
-        notifier.ClubEndedLife -= OnRelease;
+        cube.CubeEndedLife -= OnRelease;
     }
 
     private Vector3 StartPoint()

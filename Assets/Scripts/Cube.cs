@@ -11,7 +11,7 @@ public class Cube : MonoBehaviour, INotifier
     private float _minTime = 2.0f;
     private float _maxTime = 5.0f;
 
-    public event Action<INotifier> ClubEndedLife;
+    public event Action<INotifier> CubeEndedLife;
 
     private void Awake()
     {
@@ -30,17 +30,18 @@ public class Cube : MonoBehaviour, INotifier
         if (_hasCollided == false && collision.gameObject.TryGetComponent(out Platform platform))
         {
             _hasCollided = true;
-            _renderer.material.color = platform.GenerateRandomColor();
+            _renderer.material.color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
 
-            StartCoroutine(ReturnToPoolAfterDelay(UnityEngine.Random.Range(_minTime, _maxTime)));
+            float delay = UnityEngine.Random.Range(_minTime, _maxTime);
+            StartCoroutine(Delay(delay));            
         }
     }
 
-    private IEnumerator ReturnToPoolAfterDelay(float delay)
+    private IEnumerator Delay(float delay)
     {
         yield return new WaitForSeconds(delay);
 
-        ClubEndedLife?.Invoke(this);
+        CubeEndedLife?.Invoke(this);
     }
 }
 
