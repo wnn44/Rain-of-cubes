@@ -2,26 +2,29 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Renderer))]
-public class Cube : MonoBehaviour, INotifier
+[RequireComponent(typeof(Renderer), typeof(Rigidbody))]
+public class Cube : MonoBehaviour
 {
     private bool _hasCollided = false;
     private Renderer _renderer;
     private Color _initialColor = Color.blue;
     private float _minTime = 2.0f;
     private float _maxTime = 5.0f;
+    private Rigidbody _rigidbody;
 
-    public event Action<INotifier> CubeEndedLife;
+    public event Action<Cube> EndedLife;
 
     private void Awake()
     {
         _renderer = GetComponent<Renderer>();
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
     public void Init()
     {
         _hasCollided = false;
         _renderer.material.color = _initialColor;
+        _rigidbody.velocity = Vector3.zero;
         transform.rotation = Quaternion.identity;
     }
 
@@ -30,10 +33,10 @@ public class Cube : MonoBehaviour, INotifier
         if (_hasCollided == false && collision.gameObject.TryGetComponent(out Platform platform))
         {
             _hasCollided = true;
-            _renderer.material.color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+            _renderer.material.color = UnityEngine.Random.ColorHSV();
 
             float delay = UnityEngine.Random.Range(_minTime, _maxTime);
-            StartCoroutine(Delay(delay));            
+            StartCoroutine(Delay(delay));
         }
     }
 
@@ -41,7 +44,7 @@ public class Cube : MonoBehaviour, INotifier
     {
         yield return new WaitForSeconds(delay);
 
-        CubeEndedLife?.Invoke(this);
+        EndedLife?.Invoke(this);
     }
 }
 

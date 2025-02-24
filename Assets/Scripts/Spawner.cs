@@ -13,7 +13,6 @@ public class Spawner : MonoBehaviour
     private ObjectPool<Cube> _pool;
     private float _startPointMin = -10.0f;
     private float _startPointMax = 10.0f;
-    private INotifier _notifier;
 
     private void Awake()
     {
@@ -55,14 +54,14 @@ public class Spawner : MonoBehaviour
     {
         Cube cube = _pool.Get();
 
-        cube.CubeEndedLife += OnRelease;
+        cube.EndedLife += OnRelease;
     }
 
-    private void OnRelease(INotifier cube)
+    private void OnRelease(Cube cube)
     {
-        _pool.Release((Cube)cube);
+        _pool.Release(cube);
 
-        cube.CubeEndedLife -= OnRelease;
+        cube.EndedLife -= OnRelease;
     }
 
     private Vector3 StartPoint()
