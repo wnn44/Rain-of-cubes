@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Renderer), typeof(Rigidbody))]
+[RequireComponent(typeof(Renderer), typeof(Rigidbody), typeof(ColorModifier))]
 public class Cube : MonoBehaviour
 {
     private bool _hasCollided = false;
@@ -11,13 +11,16 @@ public class Cube : MonoBehaviour
     private float _minTime = 2.0f;
     private float _maxTime = 5.0f;
     private Rigidbody _rigidbody;
+    private ColorModifier _colorModifier;
 
     public event Action<Cube> EndedLife;
+    public event Action<Cube> CollisionCube;
 
     private void Awake()
     {
         _renderer = GetComponent<Renderer>();
         _rigidbody = GetComponent<Rigidbody>();
+        _colorModifier = GetComponent<ColorModifier>();
     }
 
     public void Init()
@@ -33,7 +36,8 @@ public class Cube : MonoBehaviour
         if (_hasCollided == false && collision.gameObject.TryGetComponent(out Platform platform))
         {
             _hasCollided = true;
-            _renderer.material.color = UnityEngine.Random.ColorHSV();
+
+            _colorModifier.RColor(this);
 
             float delay = UnityEngine.Random.Range(_minTime, _maxTime);
             StartCoroutine(Delay(delay));
